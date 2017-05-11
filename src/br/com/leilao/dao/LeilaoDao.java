@@ -22,7 +22,7 @@ public class LeilaoDao {
 	public LeilaoDao() {
 		try {
 			this.conexao = DriverManager.getConnection(
-					"jdbc:mysql://localhost/mocks", "root", "");
+					"jdbc:mysql://localhost/leiloes", "admin", "admin");
 		} catch (Exception e) {
 			throw new RuntimeException(e);
 		}
@@ -87,11 +87,12 @@ public class LeilaoDao {
 			List<Leilao> leiloes = new ArrayList<Leilao>();
 			while(rs.next()) {
 				Leilao leilao = new Leilao(rs.getString("descricao"), data(rs.getDate("data")));
-				leilao.setId(rs.getInt("id"));
+				leilao.setId(rs.getInt("LEILAO_ID"));
 				if(rs.getBoolean("encerrado")) leilao.encerra();
 				
-				String sql2 = "SELECT VALOR, NOME, U.ID AS USUARIO_ID, L.ID AS LANCE_ID FROM LANCES L INNER JOIN USUARIO U ON U.ID = L.USUARIO_ID WHERE LEILAO_ID = " + rs.getInt("id");
-				PreparedStatement ps2 = conexao.prepareStatement(sql2);
+                                String sql2 = "SELECT VALOR, NOME, U.USUARIO_ID AS USUARIO_ID, L.LANCE_ID AS LANCE_ID FROM LANCES L INNER JOIN USUARIO U ON U.USUARIO_ID = L.USUARIO_ID WHERE LEILAO_ID = "+ rs.getInt("LEILAO_ID");
+				
+                                PreparedStatement ps2 = conexao.prepareStatement(sql2);
 				ResultSet rs2 = ps2.executeQuery();
 				
 				while(rs2.next()) {
@@ -118,7 +119,7 @@ public class LeilaoDao {
 	public void atualiza(Leilao leilao) {
 		
 		try {
-			String sql = "UPDATE LEILAO SET DESCRICAO=?, DATA=?, ENCERRADO=? WHERE ID = ?;";
+			String sql = "UPDATE LEILAO SET DESCRICAO=?, DATA=?, ENCERRADO=? WHERE LEILAO_ID = ?;";
 			PreparedStatement ps = conexao.prepareStatement(sql);
 			ps.setString(1, leilao.getDescricao());
 			ps.setDate(2, new java.sql.Date(leilao.getData().getTimeInMillis()));
